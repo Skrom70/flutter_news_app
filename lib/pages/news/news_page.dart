@@ -1,143 +1,118 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_news_app/pages/news/items/news_item.dart';
+import 'package:flutter_news_app/reuse_widgets/simple_snackbar.dart';
+import 'package:flutter_news_app/provider/auth_provider.dart';
 import 'package:flutter_news_app/provider/news_provider.dart';
-import '../../provider/auth_provider.dart';
-import '../../provider/models/arctile.dart';
+import 'package:provider/provider.dart';
 
-class NewsPage extends StatefulWidget {
-  const NewsPage({Key? key}) : super(key: key);
+class NewsPage extends StatelessWidget {
+  NewsPage({Key? key}) : super(key: key);
 
-  @override
-  State<NewsPage> createState() => _NewsPageState();
-}
-
-class _NewsPageState extends State<NewsPage> {
-  late Future<dynamic> futureNews;
-  bool _isSearching = false;
-  String? _newsQuery = null;
-  final _searchFieldController = TextEditingController();
   final _gridController = ScrollController();
 
   @override
-  void initState() {
-    super.initState();
-    futureNews = NewsProvider().fetchTopArticles();
+  Widget build(BuildContext context) {
+    _loadTopArticles(context);
+    return Consumer<NewsProvider>(
+        builder: ((ctx, provider, child) => Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: provider.getSearchingState
+                    ? Icon(Icons.close)
+                    : Icon(Icons.search),
+                onPressed: () => _searchButtonTapped(ctx),
+              ),
+              title: provider.getSearchingState
+                  ? _buildSearchField(ctx)
+                  : Text('News App'),
+              actions: [
+                IconButton(
+                  onPressed: () => _logout(ctx),
+                  icon: Icon(Icons.exit_to_app_rounded
+                ),
+              ],
+            ),
+            body: _buildPageWidget(ctx, provider))));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: _isSearching ? Icon(Icons.close) : Icon(Icons.search),
-          onPressed: _searchButtonTapped,
-        ),
-        title: _isSearching
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: TextField(
-                    controller: _searchFieldController,
-                    onSubmitted: _searchFieldSubmitted,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                        fillColor: Colors.white.withOpacity(0.2),
-                        filled: true,
-                        border: InputBorder.none,
-                        hintText: 'search',
-                        hintStyle:
-                            TextStyle(color: Colors.white.withOpacity(0.7)))),
-              )
-            : Text('News App'),
-        actions: [
-          IconButton(
-            onPressed: _logout,
-            icon: Icon(Icons.exit_to_app),
+  Widget _buildPageWidget(BuildContext context, NewsProvider provider) {
+    if (provider.articles.isNotEmpty) {
+      final items = provider.articles
+          .map<NewsItem>((e) => NewsItem(
+                title: e.title ?? '',
+                description: e.description ?? '',
+                imageUrl: e.urlToImage ?? '',
+              ))
+          .toList();
+
+      if (_gridController.hasClients &&
+          provider.newsQuery?.isNotEmpty == true) {
+        _gridController.jumpTo(0.0);
+      }
+
+      return GridView.builder(
+          controller: _gridController,
+          itemCount: items.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            childAspectRatio: 1.2,
+            crossAxisCount: 1,
           ),
-        ],
-      ),
-      body: FutureBuilder<dynamic>(
-          future: futureNews,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: const CircularProgressIndicator());
-            } else if (snapshot.hasData && snapshot.data is EverythingNews) {
-              final items = (snapshot.data as EverythingNews)
-                  .articles
-                  .map<NewsItem>((e) => NewsItem(
-                        title: e.title ?? '',
-                        description: e.description ?? '',
-                        imageUrl: e.urlToImage ?? '',
-                      ))
-                  .toList();
-              if (items.isNotEmpty) {
-                return GridView.builder(
-                    // controller: _gridController,
-                    itemCount: items.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      childAspectRatio: 1.2,
-                      crossAxisCount: 1,
-                    ),
-                    itemBuilder: (BuildContext context, int index) {
-                      return items[index];
-                    });
-              } else {
-                return Center(
-                    child: Text(
-                  'No results found',
-                  style: TextStyle(color: Colors.grey),
-                ));
-              }
-            } else if (snapshot.hasError) {
-              return Center(child: Text('${snapshot.error}'));
-            }
-            // By default, show a loading spinner.
-            return Center(child: const CircularProgressIndicator());
-          }),
+          itemBuilder: (BuildContext context, int index) {
+            return items[index];
+          });
+    } else {
+      return Center(
+          child: Text(
+        'No results found',
+        style: TextStyle(color: Colors.grey),
+      ));
+    }
+  }
+
+  Widget _buildSearchField(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: TextField(
+          onSubmitted: (value) => _searchFieldSubmitted(context, value),
+          style: TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+              fillColor: Colors.white.withOpacity(0.2),
+              filled: true,
+              border: InputBorder.none,
+              hintText: 'search',
+              hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)))),
     );
   }
 
-  void _searchButtonTapped() {
-    setState(() {
-      _isSearching = !_isSearching;
-      _searchFieldController.text = '';
-      if (!_isSearching && _newsQuery?.isNotEmpty == true) {
-        _newsQuery = null;
-        _fetchArticles(updateState: false);
-      }
-    });
+  void _searchButtonTapped(BuildContext context) {
+    Provider.of<NewsProvider>(context, listen: false).changeSearingState();
   }
 
-  void _searchFieldSubmitted(String value) {
-    if (value.isNotEmpty && value != _newsQuery) {
-      _newsQuery = value;
-      _fetchArticles();
+  void _searchFieldSubmitted(BuildContext context, String value) {
+    _loadSearchArticles(context, value);
+  }
+
+  void _loadTopArticles(BuildContext context) async {
+    Provider.of<NewsProvider>(context, listen: false).loadTopArticles().onError(
+        (error, stackTrace) =>
+            showSnackBar(context, error.toString(), SnackBarType.error));
+  }
+
+  void _loadSearchArticles(BuildContext context, String query) {
+    if (query.isNotEmpty) {
+      Provider.of<NewsProvider>(context, listen: false)
+          .loadSearchArticles(query)
+          .onError((error, stackTrace) =>
+              showSnackBar(context, error.toString(), SnackBarType.error));
     }
   }
 
-  void _logout() {
-    AuthProvider().signOut().then((_) {
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
-    });
-  }
-
-  void _fetchArticles({bool updateState = true}) {
-    if (updateState) {
-      setState(() {
-        if (_newsQuery != null && _newsQuery?.isNotEmpty == true) {
-          futureNews = NewsProvider().fetchSearchArticles(_newsQuery ?? '');
-        } else {
-          futureNews = NewsProvider().fetchTopArticles();
-        }
-        _gridController.jumpTo(0.0);
-      });
-    } else {
-      if (_newsQuery != null && _newsQuery?.isNotEmpty == true) {
-        futureNews = NewsProvider().fetchSearchArticles(_newsQuery ?? '');
-      } else {
-        futureNews = NewsProvider().fetchTopArticles();
-      }
-      _gridController.jumpTo(0.0);
-    }
+  void _logout(BuildContext context) {
+    AuthProvider()
+        .signOut()
+        .then((_) => Navigator.of(context)
+            .pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false))
+        .onError((error, stackTrace) =>
+            showSnackBar(context, error.toString(), SnackBarType.error));
   }
 }

@@ -5,7 +5,8 @@ import 'package:flutter_news_app/pages/authentication/login_page.dart';
 import 'package:flutter_news_app/pages/authentication/register_page.dart';
 import 'package:flutter_news_app/firebase_support/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_news_app/provider/data_provider.dart';
+import 'package:provider/provider.dart';
+import 'provider/news_provider.dart';
 import 'pages/home_page.dart';
 
 void main() async {
@@ -13,7 +14,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+      create: (_) => NewsProvider(), child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -28,7 +30,8 @@ class MyApp extends StatelessWidget {
         '/login': (_) => LoginPage(),
         '/register': (_) => RegisterPage(),
         '/forgot_password': (_) => ForgotPassword(),
-        '/home': (_) => HomePage(),
+        '/home': (_) => ChangeNotifierProvider(
+            create: (_) => NewsProvider(), child: HomePage()),
       },
     );
   }
