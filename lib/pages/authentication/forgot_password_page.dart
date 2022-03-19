@@ -96,13 +96,11 @@ class ForgotPassword extends StatelessWidget {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState?.save();
       if (_emailFieldValue != null) {
-        AuthProvider().resetPassword(_emailFieldValue!).then((value) {
-          if (value == null) {
-            Navigator.of(context).pop();
-          } else if (value.isNotEmpty) {
-            showSnackBar(context, 'Error: $value', SnackBarType.error);
-          }
-        });
+        AuthProvider()
+            .resetPassword(_emailFieldValue!)
+            .then((_) => Navigator.of(context).pop())
+            .onError((error, stackTrace) =>
+                showSnackBar(context, error.toString(), SnackBarType.error));
       }
     }
   }

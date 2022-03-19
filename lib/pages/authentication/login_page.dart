@@ -114,14 +114,10 @@ class LoginPage extends StatelessWidget {
           _passwordFieldValue?.isNotEmpty == true) {
         AuthProvider()
             .signIn(email: _emailFieldValue!, password: _passwordFieldValue!)
-            .then((value) {
-          if (value == null) {
-            Navigator.of(context).pushNamedAndRemoveUntil(
-                '/home', (Route<dynamic> route) => false);
-          } else if (value.isNotEmpty) {
-            showSnackBar(context, 'Error: $value', SnackBarType.error);
-          }
-        });
+            .then((_) => Navigator.of(context).pushNamedAndRemoveUntil(
+                '/home', (Route<dynamic> route) => false))
+            .onError((error, stackTrace) =>
+                showSnackBar(context, error.toString(), SnackBarType.error));
       }
     }
   }

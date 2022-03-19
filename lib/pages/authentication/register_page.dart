@@ -112,14 +112,10 @@ class RegisterPage extends StatelessWidget {
           _confirmPasswordFieldValue?.isNotEmpty == true) {
         AuthProvider()
             .signUp(email: _emailFieldValue!, password: _passwordFieldValue!)
-            .then((value) {
-          if (value == null) {
-            Navigator.of(context).pushNamedAndRemoveUntil(
-                '/login', (Route<dynamic> route) => false);
-          } else if (value.isNotEmpty) {
-            showSnackBar(context, 'Error: $value', SnackBarType.error);
-          }
-        });
+            .then((_) => Navigator.of(context).pushNamedAndRemoveUntil(
+                '/login', (Route<dynamic> route) => false))
+            .onError((error, stackTrace) =>
+                showSnackBar(context, error.toString(), SnackBarType.error));
       }
     }
   }
