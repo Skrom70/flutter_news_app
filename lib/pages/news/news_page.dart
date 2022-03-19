@@ -27,9 +27,8 @@ class NewsPage extends StatelessWidget {
                   : Text('News App'),
               actions: [
                 IconButton(
-                  onPressed: () => _logout(ctx),
-                  icon: Icon(Icons.exit_to_app_rounded
-                ),
+                    onPressed: () => _logout(ctx),
+                    icon: Icon(Icons.exit_to_app_rounded)),
               ],
             ),
             body: _buildPageWidget(ctx, provider))));
