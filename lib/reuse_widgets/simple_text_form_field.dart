@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../validators/main_validator.dart';
 
 typedef validatorCallback = String? Function(String?);
 
@@ -42,6 +41,3 @@ class SimpleTextFormField extends StatelessWidget {
     );
   }
 }
-
-
-

@@ -1,5 +1,5 @@
 class Article {
-  late final int? id;
+  int? id;
   final String? author;
   final String? title;
   final String? description;
@@ -44,10 +44,22 @@ class Article {
         title: map['title'],
         description: map['description'],
         urlToImage: map['urlToImage'],
-        content: map['author'],
-        publishedAt: map['author'],
+        content: map['content'],
+        publishedAt: map['publishedAt'],
         isLastLoaded: map['isLastLoaded'] == 1 ? true : false,
         isFavorite: map['isFavorite'] == 1 ? true : false);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! Article) return false;
+    if (author != other.author) return false;
+    if (title != other.title) return false;
+    if (description != other.description) return false;
+    if (urlToImage != other.urlToImage) return false;
+    if (content != other.content) return false;
+    if (publishedAt != other.publishedAt) return false;
+    return true;
   }
 }
 

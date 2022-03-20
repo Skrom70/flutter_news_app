@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'models/arctile.dart';
 
-class DataProvider {
+class DatabaseProvider {
   late Database db;
 
   final tableName = 'Articles';
@@ -22,7 +23,7 @@ class DataProvider {
     });
   }
 
-  Future<List<Article>> getAll() async {
+  Future<Set<Article>> getAll() async {
     await open();
     List<Map> maps = await db.query(tableName, columns: [
       'id',
@@ -35,7 +36,26 @@ class DataProvider {
       'isLastLoaded',
       'isFavorite'
     ]);
-    List<Article> records = maps.map((e) => Article.fromMap(e)).toList();
+    Set<Article> records = maps.map((e) => Article.fromMap(e)).toSet();
+    return records;
+  }
+
+  Future<Set<Article>> getFavoriteNews() async {
+    await open();
+    List<Map> maps = await db.query(tableName,
+        columns: [
+          'id',
+          'author',
+          'title',
+          'description',
+          'urlToImage',
+          'content',
+          'publishedAt',
+          'isLastLoaded',
+          'isFavorite'
+        ],
+        where: 'isFavorite = 1');
+    Set<Article> records = maps.map((e) => Article.fromMap(e)).toSet();
     return records;
   }
 
@@ -61,29 +81,6 @@ class DataProvider {
     }
   }
 
-  Future<List<Article>> getFavoriteItems() async {
-    await open();
-    List<Map> maps = await db.query(tableName,
-        columns: [
-          'id',
-          'author',
-          'title',
-          'description',
-          'urlToImage',
-          'content',
-          'publishedAt',
-          'isLastLoaded',
-          'isFavorite'
-        ],
-        where: 'isFavorite = 1');
-
-    return maps.map((e) => Article.fromMap(e)).toList();
-  }
-
-  // Future<List[Article]> getLastLoadedItems() async {
-  //   await open();
-  // }
-
   Future<Article> insert(Article article) async {
     await open();
 
@@ -104,10 +101,18 @@ class DataProvider {
   Future<Article> delete(Article article) async {
     if (article.id != null) {
       await open();
-
       article.id = await db.delete(tableName, where: 'id = ${article.id ?? 0}');
     }
     return article;
+  }
+
+  Future<void> deleteAll() async {
+    try {
+      await open();
+      await db.execute('DELETE FROM $tableName');
+    } catch (e) {
+      ErrorHint('An error has occurred');
+    }
   }
 
   Future<void> close() async {

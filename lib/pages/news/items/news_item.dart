@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class NewsItem extends StatelessWidget {
-  const NewsItem(
+class NewsItem extends StatefulWidget {
+  NewsItem(
       {Key? key,
       required this.title,
       required this.description,
-      required this.imageUrl})
+      required this.imageUrl,
+      required this.isFavorite,
+      required this.changeFavoriteState})
       : super(key: key);
 
   final String title;
   final String description;
   final String imageUrl;
+  bool isFavorite;
+  final Function changeFavoriteState;
 
   static final Widget _failedImagePlaceholder = Container(
     width: double.infinity,
@@ -24,6 +28,11 @@ class NewsItem extends StatelessWidget {
     ),
   );
 
+  @override
+  State<NewsItem> createState() => _NewsItemState();
+}
+
+class _NewsItemState extends State<NewsItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -41,7 +50,7 @@ class NewsItem extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      title,
+                      widget.title,
                       maxLines: 3,
                       style: TextStyle(fontSize: 20.0, shadows: [
                         Shadow(
@@ -52,11 +61,10 @@ class NewsItem extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.favorite_border_outlined)),
-                  IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.favorite_border_outlined)),
+                      onPressed: _changeFavoriteState,
+                      icon: Icon(widget.isFavorite
+                          ? Icons.favorite_outlined
+                          : Icons.favorite_border_outlined)),
                 ],
               ),
             ),
@@ -71,8 +79,8 @@ class NewsItem extends StatelessWidget {
               child: ClipRRect(
                   borderRadius:
                       BorderRadius.vertical(bottom: Radius.circular(8.0)),
-                  child: imageUrl == ''
-                      ? _failedImagePlaceholder
+                  child: widget.imageUrl == ''
+                      ? NewsItem._failedImagePlaceholder
                       : _loadNewsImage()),
             ))
           ],
@@ -86,9 +94,16 @@ class NewsItem extends StatelessWidget {
       fit: BoxFit.cover,
       width: double.infinity,
       height: double.infinity,
-      imageUrl: imageUrl,
+      imageUrl: widget.imageUrl,
       placeholder: (context, url) => CircularProgressIndicator(),
-      errorWidget: (context, url, error) => _failedImagePlaceholder,
+      errorWidget: (context, url, error) => NewsItem._failedImagePlaceholder,
     );
+  }
+
+  void _changeFavoriteState() {
+    widget.changeFavoriteState();
+    setState(() {
+      widget.isFavorite = !widget.isFavorite;
+    });
   }
 }

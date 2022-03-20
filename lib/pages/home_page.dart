@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_news_app/pages/news/news_favorites_page.dart';
+import 'package:flutter_news_app/pages/news/news_favorite_page.dart';
 import 'package:flutter_news_app/pages/news/news_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -13,7 +13,7 @@ class _HomePageState extends State<HomePage> {
   var _bottomNavigationBarSelectedIndex = 0;
   final List<Widget> _bottomNavigationBarItems = [
     NewsPage(),
-    NewsFavoritesPage()
+    NewsFavoritePage()
   ];
 
   @override

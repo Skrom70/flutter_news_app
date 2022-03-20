@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-
 import '../../provider/auth_provider.dart';
 import '../../reuse_widgets/simple_snackbar.dart';
 import '../../reuse_widgets/simple_text_form_field.dart';
 import '../../validators/main_validator.dart';
 
+// ignore: must_be_immutable
 class RegisterPage extends StatelessWidget {
   RegisterPage({Key? key}) : super(key: key);
   final _formKey = GlobalKey<FormState>();

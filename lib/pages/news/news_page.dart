@@ -12,6 +12,8 @@ class NewsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // DatabaseProvider().deleteAll();
+    _fetchCachedArticles(context);
     _loadTopArticles(context);
     return Consumer<NewsProvider>(
         builder: ((ctx, provider, child) => Scaffold(
@@ -38,10 +40,14 @@ class NewsPage extends StatelessWidget {
     if (provider.articles.isNotEmpty) {
       final items = provider.articles
           .map<NewsItem>((e) => NewsItem(
-                title: e.title ?? '',
-                description: e.description ?? '',
-                imageUrl: e.urlToImage ?? '',
-              ))
+              title: e.title ?? '',
+              description: e.description ?? '',
+              imageUrl: e.urlToImage ?? '',
+              isFavorite: e.isFavorite,
+              changeFavoriteState: () {
+                e.isFavorite = !e.isFavorite;
+                provider.updateArticle(e);
+              }))
           .toList();
 
       if (_gridController.hasClients &&
@@ -94,6 +100,13 @@ class NewsPage extends StatelessWidget {
   void _loadTopArticles(BuildContext context) async {
     Provider.of<NewsProvider>(context, listen: false).loadTopArticles().onError(
         (error, stackTrace) =>
+            showSnackBar(context, error.toString(), SnackBarType.error));
+  }
+
+  void _fetchCachedArticles(BuildContext context) async {
+    Provider.of<NewsProvider>(context, listen: false)
+        .fetchCachedArticles()
+        .onError((error, stackTrace) =>
             showSnackBar(context, error.toString(), SnackBarType.error));
   }
 
