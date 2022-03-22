@@ -5,6 +5,7 @@ import 'package:flutter_news_app/pages/authentication/login_page.dart';
 import 'package:flutter_news_app/pages/authentication/register_page.dart';
 import 'package:flutter_news_app/firebase_support/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_news_app/pages/news/news_details_page.dart';
 import 'package:flutter_news_app/provider/news_favorite_provider.dart';
 import 'package:provider/provider.dart';
 import 'provider/news_provider.dart';

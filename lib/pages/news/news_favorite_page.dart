@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_news_app/pages/news/items/news_item.dart';
+import 'package:flutter_news_app/pages/news/news_details_page.dart';
+import 'package:flutter_news_app/provider/models/arctile.dart';
 import 'package:flutter_news_app/provider/news_favorite_provider.dart';
 import 'package:provider/provider.dart';
 import '../../provider/auth_provider.dart';
@@ -40,14 +42,16 @@ class NewsFavoritePage extends StatelessWidget {
     if (provider.articles.isNotEmpty) {
       final items = provider.articles
           .map<NewsItem>((e) => NewsItem(
-              title: e.title ?? '',
-              description: e.description ?? '',
-              imageUrl: e.urlToImage ?? '',
-              isFavorite: e.isFavorite,
-              changeFavoriteState: () {
-                e.isFavorite = !e.isFavorite;
-                provider.remote(e);
-              }))
+                title: e.title ?? '',
+                description: e.description ?? '',
+                imageUrl: e.urlToImage ?? '',
+                isFavorite: e.isFavorite,
+                changeFavoriteState: () {
+                  e.isFavorite = !e.isFavorite;
+                  provider.remote(e);
+                },
+                onTapped: () => _pushToDetails(context, e),
+              ))
           .toList();
 
       if (_gridController.hasClients) {
@@ -75,5 +79,15 @@ class NewsFavoritePage extends StatelessWidget {
 
   void _loadArticles(BuildContext context) {
     Provider.of<NewsFavoriteProvider>(context, listen: false).load();
+  }
+
+  void _pushToDetails(BuildContext context, Article element) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => NewsDetailsPage(
+                article: element,
+              )),
+    );
   }
 }

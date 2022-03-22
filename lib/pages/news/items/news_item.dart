@@ -8,7 +8,8 @@ class NewsItem extends StatefulWidget {
       required this.description,
       required this.imageUrl,
       required this.isFavorite,
-      required this.changeFavoriteState})
+      required this.changeFavoriteState,
+      required this.onTapped})
       : super(key: key);
 
   final String title;
@@ -16,6 +17,7 @@ class NewsItem extends StatefulWidget {
   final String imageUrl;
   bool isFavorite;
   final Function changeFavoriteState;
+  final Function onTapped;
 
   static final Widget _failedImagePlaceholder = Container(
     width: double.infinity,
@@ -35,55 +37,60 @@ class NewsItem extends StatefulWidget {
 class _NewsItemState extends State<NewsItem> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        elevation: 8,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      widget.title,
-                      maxLines: 3,
-                      style: TextStyle(fontSize: 20.0, shadows: [
-                        Shadow(
-                            color: Colors.grey,
-                            offset: Offset(1.0, 1.0),
-                            blurRadius: 2.0)
-                      ]),
+    return GestureDetector(
+      onTap: () {
+        widget.onTapped();
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          elevation: 8,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        widget.title,
+                        maxLines: 3,
+                        style: TextStyle(fontSize: 20.0, shadows: [
+                          Shadow(
+                              color: Colors.grey,
+                              offset: Offset(1.0, 1.0),
+                              blurRadius: 2.0)
+                        ]),
+                      ),
                     ),
-                  ),
-                  IconButton(
-                      onPressed: _changeFavoriteState,
-                      icon: Icon(widget.isFavorite
-                          ? Icons.favorite_outlined
-                          : Icons.favorite_border_outlined)),
-                ],
+                    IconButton(
+                        onPressed: _changeFavoriteState,
+                        icon: Icon(widget.isFavorite
+                            ? Icons.favorite_outlined
+                            : Icons.favorite_border_outlined)),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-                child: Container(
-              decoration: BoxDecoration(boxShadow: [
-                BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
-                    offset: Offset(0.0, -25.0),
-                    blurRadius: 25.0)
-              ]),
-              child: ClipRRect(
-                  borderRadius:
-                      BorderRadius.vertical(bottom: Radius.circular(8.0)),
-                  child: widget.imageUrl == ''
-                      ? NewsItem._failedImagePlaceholder
-                      : _loadNewsImage()),
-            ))
-          ],
+              Expanded(
+                  child: Container(
+                decoration: BoxDecoration(boxShadow: [
+                  BoxShadow(
+                      color: Colors.white.withOpacity(0.3),
+                      offset: Offset(0.0, -25.0),
+                      blurRadius: 25.0)
+                ]),
+                child: ClipRRect(
+                    borderRadius:
+                        BorderRadius.vertical(bottom: Radius.circular(8.0)),
+                    child: widget.imageUrl == ''
+                        ? NewsItem._failedImagePlaceholder
+                        : _loadNewsImage()),
+              ))
+            ],
+          ),
         ),
       ),
     );

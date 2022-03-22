@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_news_app/pages/news/items/news_item.dart';
+import 'package:flutter_news_app/pages/news/news_details_page.dart';
+import 'package:flutter_news_app/provider/models/arctile.dart';
 import 'package:flutter_news_app/reuse_widgets/simple_snackbar.dart';
 import 'package:flutter_news_app/provider/auth_provider.dart';
 import 'package:flutter_news_app/provider/news_provider.dart';
@@ -40,14 +42,16 @@ class NewsPage extends StatelessWidget {
     if (provider.articles.isNotEmpty) {
       final items = provider.articles
           .map<NewsItem>((e) => NewsItem(
-              title: e.title ?? '',
-              description: e.description ?? '',
-              imageUrl: e.urlToImage ?? '',
-              isFavorite: e.isFavorite,
-              changeFavoriteState: () {
-                e.isFavorite = !e.isFavorite;
-                provider.updateArticle(e);
-              }))
+                title: e.title ?? '',
+                description: e.description ?? '',
+                imageUrl: e.urlToImage ?? '',
+                isFavorite: e.isFavorite,
+                changeFavoriteState: () {
+                  e.isFavorite = !e.isFavorite;
+                  provider.updateArticle(e);
+                },
+                onTapped: () => _pushToDetails(context, e),
+              ))
           .toList();
 
       if (_gridController.hasClients &&
@@ -126,5 +130,15 @@ class NewsPage extends StatelessWidget {
             .pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false))
         .onError((error, stackTrace) =>
             showSnackBar(context, error.toString(), SnackBarType.error));
+  }
+
+  void _pushToDetails(BuildContext context, Article element) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => NewsDetailsPage(
+                article: element,
+              )),
+    );
   }
 }

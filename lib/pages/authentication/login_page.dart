@@ -7,6 +7,7 @@ import '../../reuse_widgets/simple_snackbar.dart';
 final _defaultLogin = 'skrom70@gmail.com';
 final _defaultPassword = '0955978485b';
 
+// ignore: must_be_immutable
 class LoginPage extends StatelessWidget {
   LoginPage({Key? key}) : super(key: key);
   final _formKey = GlobalKey<FormState>();
